@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package iot;
+
+enum SensorStatus {
+  OK      = 0;
+  WARNING = 1;
+  FAULT   = 2;
+}
+
+message Vec3 {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+}
+
+message SensorReading {
+  uint32       device_id    = 1;
+  uint64       timestamp_ms = 2;
+  float        temperature  = 3;  // Celsius
+  float        humidity     = 4;  // % RH
+  float        pressure     = 5;  // hPa
+  Vec3         accelerometer = 6;
+  uint32       uptime_s     = 7;
+  SensorStatus status       = 8;
+}
