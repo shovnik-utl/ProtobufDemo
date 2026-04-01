@@ -1,0 +1,6 @@
+__pycache__/
+.vscode/
+venv/
+sensor_pb2.py
+sensor.pb*
+a.out
