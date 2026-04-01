@@ -34,14 +34,16 @@ static void fill_reading(Iot__SensorReading *r, Iot__Vec3 *accel, uint32_t uptim
     iot__sensor_reading__init(r);
     iot__vec3__init(accel);
 
+    int _;
     r->device_id     = 42;
     r->timestamp_ms  = now_ms();
     r->temperature   = randf(18.0f, 35.0f);
     r->humidity      = randf(30.0f, 90.0f);
     r->pressure      = randf(1000.0f, 1025.0f);
     r->uptime_s      = uptime;
-    r->status        = (uptime % 10 == 0) ? IOT__SENSOR_STATUS__WARNING
-                                           : IOT__SENSOR_STATUS__OK;
+    r->status        = ((_=rand() % 3), _> 1 ? IOT__SENSOR_STATUS__FAULT
+                                      : _> 0 ? IOT__SENSOR_STATUS__WARNING
+                                      :        IOT__SENSOR_STATUS__OK);
 
     accel->x         = randf(-0.1f, 0.1f);
     accel->y         = randf(-0.1f, 0.1f);
