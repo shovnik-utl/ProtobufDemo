@@ -1,1 +1,2 @@
 protobuf==7.34.1
+uvloop==0.22.1

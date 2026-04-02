@@ -9,6 +9,10 @@ import socket
 import struct
 import datetime
 from sensor_pb2 import SensorReading, SensorStatus
+import asyncio
+import uvloop
+
+uvloop.install() # C-based event loop for better performance (comparable to Go or Nodejs).
 
 HOST = "127.0.0.1"
 PORT = 5555
@@ -45,27 +49,39 @@ def pretty_print(msg: SensorReading):
     return msg.device_id
 
 
-def serve(log: [int]):
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as srv:
-        srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        srv.bind((HOST, PORT))
-        srv.listen(1)
-        print(f"Listening on {HOST}:{PORT} ...")
-        conn, addr = srv.accept()
-        print(f"Connected: {addr}")
-        with conn:
-            while True:
-                header = recv_exact(conn, 4)
-                length = struct.unpack(">I", header)[0]
-                payload = recv_exact(conn, length)
-                msg = SensorReading()
-                msg.ParseFromString(payload)
-                devid = pretty_print(msg)
-                log.append(devid)
+# Note: asyncio.server works at the TCP layer.
+async def serve(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
+    global log
+    addr = writer.get_extra_info('peername')
+    print(f"Connected: {addr}")
+    try:
+        while True:
+            header = await reader.readexactly(4)
+            length = struct.unpack(">I", header)[0]
+            payload = await reader.readexactly(length)
+            msg = SensorReading()
+            msg.ParseFromString(payload)
+            devid = pretty_print(msg)
+            log.append(devid)
+    except (asyncio.IncompleteReadError, ConnectionResetError):
+        print(f"Disconnected: {addr}")
+    finally:
+        writer.close()
+        await writer.wait_closed()
+
+
+async def main():
+    global log
+    server = await asyncio.start_server(serve, HOST, PORT)
+    print(f"Server listening on {HOST}:{PORT}...")
+    async with server:
+        try:
+            await server.serve_forever()
+        except asyncio.CancelledError:
+            print("Server shutting down...")
+            print(f"{len(log)} messages received during session:", *log, sep='\n')
+            # print(f"Devices seen during this session: {set(log)}") # de-duplicate (unique devices)
 
 if __name__ == "__main__":
     log = []
-    try:
-        serve(log)
-    except KeyboardInterrupt:
-        print(f"{len(log)} messages received: ", *log, sep='\n')
+    uvloop.run(main())
