@@ -42,8 +42,10 @@ def pretty_print(msg: SensorReading):
 │  uptime      : {msg.uptime_s} s
 │  status      : {STATUS_LABEL.get(msg.status, msg.status)}
 └─────────────────────────────────────────────""")
+    return msg.device_id
 
-def serve():
+
+def serve(log: [int]):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as srv:
         srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         srv.bind((HOST, PORT))
@@ -58,7 +60,12 @@ def serve():
                 payload = recv_exact(conn, length)
                 msg = SensorReading()
                 msg.ParseFromString(payload)
-                pretty_print(msg)
+                devid = pretty_print(msg)
+                log.append(devid)
 
 if __name__ == "__main__":
-    serve()
+    log = []
+    try:
+        serve(log)
+    except KeyboardInterrupt:
+        print(f"{len(log)} messages received: ", *log, sep='\n')

@@ -33,12 +33,17 @@ purge: clean
 	rm -rf  venv/
 
 dev:
-	tmux new-session -d -s mysession \; \
-		rename-window 'Server' \; \
+	tmux new-session -d -s Protobuf \; \
+		rename-window 'Main' \; \
+		select-pane -T 'Server' \; \
 		send-keys 'source venv/bin/activate && python3 protobuf_server.py' C-m \; \
 		split-window -h \; \
 		select-pane -t 1 \; \
-		rename-window 'Client' \; \
+		select-pane -T 'Client 1' \; \
 		send-keys 'sleep 2 && ./a.out' C-m \; \
+		split-window -v \; \
+		select-pane -t 2 \; \
+		select-pane -T 'Client 2' \; \
+		send-keys 'sleep 1 && ./a.out 1>&2' C-m \; \
 		select-pane -t 0 \; \
-		attach-session -t mysession
+		attach-session -t Protobuf

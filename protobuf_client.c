@@ -35,7 +35,6 @@ static void fill_reading(Iot__SensorReading *r, Iot__Vec3 *accel, uint32_t uptim
     iot__vec3__init(accel);
 
     int _;
-    r->device_id     = 42;
     r->timestamp_ms  = now_ms();
     r->temperature   = randf(18.0f, 35.0f);
     r->humidity      = randf(30.0f, 90.0f);
@@ -49,6 +48,9 @@ static void fill_reading(Iot__SensorReading *r, Iot__Vec3 *accel, uint32_t uptim
     accel->y         = randf(-0.1f, 0.1f);
     accel->z         = randf(0.95f, 1.05f);   /* ~1g vertical */
     r->accelerometer = accel;
+
+    /* fill in random value (eg: temperature) for the device ID to ensure uniqueness (best effort). */
+    memcpy(&r->device_id, &r->temperature, sizeof(r->temperature));
 }
 
 int main(void) {
@@ -71,6 +73,8 @@ int main(void) {
     uint8_t buf[MAX_MSG_SIZE];
     uint32_t uptime = 0;
 
+    int nmessages_sent = 0;
+
     while (1) {
         Iot__SensorReading reading;
         Iot__Vec3 accel;
@@ -85,12 +89,14 @@ int main(void) {
             send(fd, buf, len, 0) != (ssize_t)len) {
             perror("send"); break;
         }
+        nmessages_sent++;
 
-        printf("Sent %zu bytes (uptime=%us)\n", len, uptime);
+        printf("Sent %zu bytes (uptime=%us, id=%d)\n", len, uptime, reading.device_id);
         uptime++;
         usleep(INTERVAL_MS * 1000);
     }
 
+    printf("%d messages sent.\n", nmessages_sent);
     close(fd);
     return 0;
 }
