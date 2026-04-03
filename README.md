@@ -169,3 +169,9 @@ But I have put all the rules in the Makefile so that it gets started through a s
 Switching backends also has the consequence that the generated code (probably) uses a different API!
 So now you will need to look at `nanopb`'s documentation to figure out what this new API is
 and how it works (what's the framework like compared to the standard Google protobuf implementation?)
+
+#### Note
+Seems like a lot of mismatch is due to differences in:
+1. Naming conventions: google appends package name `iot` with `Iot__` while nanopob with `iot_`.
+2. Struct generation details (example: what google did with reference/pointer, nanopb does with an object/struct).
+3. Different API usage (see interface files in nanopb: `pb_encode.h` and `pb_decode.h` for what functions you can use).

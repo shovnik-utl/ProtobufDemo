@@ -32,9 +32,9 @@ static float randf(float lo, float hi) {
     return lo + (hi - lo) * ((float)rand() / RAND_MAX);
 }
 
-static void fill_reading(Iot__SensorReading *r, Iot__Vec3 *accel, uint32_t uptime) {
-    iot__sensor_reading__init(r);
-    iot__vec3__init(accel);
+static void fill_reading(iot_SensorReading *r, iot_Vec3 *accel, uint32_t uptime) {
+    iot_sensor_reading__init(r);
+    iot_vec3__init(accel);
 
     int _;
     r->timestamp_ms  = now_ms();
@@ -42,14 +42,14 @@ static void fill_reading(Iot__SensorReading *r, Iot__Vec3 *accel, uint32_t uptim
     r->humidity      = randf(30.0f, 90.0f);
     r->pressure      = randf(1000.0f, 1025.0f);
     r->uptime_s      = uptime;
-    r->status        = ((_=rand() % 3), _> 1 ? IOT__SENSOR_STATUS__FAULT
-                                      : _> 0 ? IOT__SENSOR_STATUS__WARNING
-                                      :        IOT__SENSOR_STATUS__OK);
+    r->status        = ((_=rand() % 3), _> 1 ? iot_SensorStatus_FAULT
+                                      : _> 0 ? iot_SensorStatus_WARNING
+                                      :        iot_SensorStatus_OK);
 
     accel->x         = randf(-0.1f, 0.1f);
     accel->y         = randf(-0.1f, 0.1f);
     accel->z         = randf(0.95f, 1.05f);   /* ~1g vertical */
-    r->accelerometer = accel;
+    r->accelerometer = *accel; // Copy.
 
     /* fill in random value (eg: temperature) for the device ID to ensure uniqueness (best effort). */
     memcpy(&r->device_id, &r->temperature, sizeof(r->temperature));
@@ -78,12 +78,12 @@ int main(void) {
     int nmessages_sent = 0;
 
     while (1) {
-        Iot__SensorReading reading;
-        Iot__Vec3 accel;
+        iot_SensorReading reading;
+        iot_Vec3 accel;
         fill_reading(&reading, &accel, uptime);
 
-        size_t len = iot__sensor_reading__get_packed_size(&reading);
-        iot__sensor_reading__pack(&reading, buf);
+        size_t len = iot_sensor_reading__get_packed_size(&reading);
+        iot_sensor_reading__pack(&reading, buf);
 
         /* 4-byte big-endian length prefix */
         uint32_t prefix = htonl((uint32_t)len);

@@ -1,38 +1,23 @@
-protobuf_client.c:35:26: error: unknown type name ‘Iot__SensorReading’; did you mean ‘iot_SensorReading’?
-   35 | static void fill_reading(Iot__SensorReading *r, Iot__Vec3 *accel, uint32_t uptime) {
-      |                          ^~~~~~~~~~~~~~~~~~
-      |                          iot_SensorReading
-protobuf_client.c:35:49: error: unknown type name ‘Iot__Vec3’; did you mean ‘iot_Vec3’?
-   35 | static void fill_reading(Iot__SensorReading *r, Iot__Vec3 *accel, uint32_t uptime) {
-      |                                                 ^~~~~~~~~
-      |                                                 iot_Vec3
+protobuf_client.c: In function ‘fill_reading’:
+protobuf_client.c:36:5: warning: implicit declaration of function ‘iot_sensor_reading__init’; did you mean ‘iot_SensorReading_size’? [-Wimplicit-function-declaration]
+   36 |     iot_sensor_reading__init(r);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~
+      |     iot_SensorReading_size
+protobuf_client.c:37:5: warning: implicit declaration of function ‘iot_vec3__init’ [-Wimplicit-function-declaration]
+   37 |     iot_vec3__init(accel);
+      |     ^~~~~~~~~~~~~~
 protobuf_client.c: In function ‘main’:
-protobuf_client.c:81:9: error: unknown type name ‘Iot__SensorReading’; did you mean ‘iot_SensorReading’?
-   81 |         Iot__SensorReading reading;
-      |         ^~~~~~~~~~~~~~~~~~
-      |         iot_SensorReading
-protobuf_client.c:82:9: error: unknown type name ‘Iot__Vec3’; did you mean ‘iot_Vec3’?
-   82 |         Iot__Vec3 accel;
-      |         ^~~~~~~~~
-      |         iot_Vec3
-protobuf_client.c:83:9: warning: implicit declaration of function ‘fill_reading’ [-Wimplicit-function-declaration]
-   83 |         fill_reading(&reading, &accel, uptime);
-      |         ^~~~~~~~~~~~
-protobuf_client.c:85:22: warning: implicit declaration of function ‘iot__sensor_reading__get_packed_size’ [-Wimplicit-function-declaration]
-   85 |         size_t len = iot__sensor_reading__get_packed_size(&reading);
-      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-protobuf_client.c:86:9: warning: implicit declaration of function ‘iot__sensor_reading__pack’; did you mean ‘iot_SensorReading_size’? [-Wimplicit-function-declaration]
-   86 |         iot__sensor_reading__pack(&reading, buf);
-      |         ^~~~~~~~~~~~~~~~~~~~~~~~~
+protobuf_client.c:85:22: warning: implicit declaration of function ‘iot_sensor_reading__get_packed_size’ [-Wimplicit-function-declaration]
+   85 |         size_t len = iot_sensor_reading__get_packed_size(&reading);
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+protobuf_client.c:86:9: warning: implicit declaration of function ‘iot_sensor_reading__pack’; did you mean ‘iot_SensorReading_size’? [-Wimplicit-function-declaration]
+   86 |         iot_sensor_reading__pack(&reading, buf);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
       |         iot_SensorReading_size
-protobuf_client.c:96:76: error: request for member ‘device_id’ in something not a structure or union
-   96 |         printf("Sent %zu bytes (uptime=%us, id=%d)\n", len, uptime, reading.device_id);
-      |                                                                            ^
-protobuf_client.c: At top level:
-protobuf_client.c:31:14: warning: ‘randf’ defined but not used [-Wunused-function]
-   31 | static float randf(float lo, float hi) {
-      |              ^~~~~
-protobuf_client.c:25:17: warning: ‘now_ms’ defined but not used [-Wunused-function]
-   25 | static uint64_t now_ms(void) {
-      |                 ^~~~~~
-make: *** [Makefile:37: a.out] Error 1
+/usr/bin/ld: /tmp/ccaqWzIt.o: in function `main':
+protobuf_client.c:(.text.startup+0x12a): undefined reference to `iot_sensor_reading__init'
+/usr/bin/ld: protobuf_client.c:(.text.startup+0x136): undefined reference to `iot_vec3__init'
+/usr/bin/ld: protobuf_client.c:(.text.startup+0x2ce): undefined reference to `iot_sensor_reading__get_packed_size'
+/usr/bin/ld: protobuf_client.c:(.text.startup+0x2df): undefined reference to `iot_sensor_reading__pack'
+collect2: error: ld returned 1 exit status
+make: *** [Makefile:41: a.out] Error 1
