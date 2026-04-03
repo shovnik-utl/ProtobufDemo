@@ -33,9 +33,6 @@ static float randf(float lo, float hi) {
 }
 
 static void fill_reading(iot_SensorReading *r, iot_Vec3 *accel, uint32_t uptime) {
-    iot_sensor_reading__init(r);
-    iot_vec3__init(accel);
-
     int _;
     r->timestamp_ms  = now_ms();
     r->temperature   = randf(18.0f, 35.0f);
@@ -77,13 +74,22 @@ int main(void) {
 
     int nmessages_sent = 0;
 
+    // Declare the output buffer that is to be used.
+    pb_ostream_t stream = pb_ostream_from_buffer(buf, sizeof(buf));
+
     while (1) {
-        iot_SensorReading reading;
-        iot_Vec3 accel;
+        iot_SensorReading reading = iot_SensorReading_init_zero; // Need to initialize here since macro expands to an array initializer.
+        iot_Vec3 accel = iot_Vec3_init_zero;
         fill_reading(&reading, &accel, uptime);
 
-        size_t len = iot_sensor_reading__get_packed_size(&reading);
-        iot_sensor_reading__pack(&reading, buf);
+        // Encode.
+        bool status = pb_encode(&stream, iot_SensorReading_fields, &reading);
+        size_t len = stream.bytes_written;
+        // Then check of any errors.
+        if (!status) {
+            fprintf(stderr, "Encoding failed: %s\n", PB_GET_ERROR(&stream));
+            continue;
+        }
 
         /* 4-byte big-endian length prefix */
         uint32_t prefix = htonl((uint32_t)len);
