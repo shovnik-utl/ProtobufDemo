@@ -85,3 +85,12 @@ async def main():
 if __name__ == "__main__":
     log = []
     uvloop.run(main())
+
+
+"""
+Note: another advantage of the asyncio.server encapsulation is that the logic for cleanly handling
+a client disconnection has been written already and gives the correct behavior unlike with raw
+socket programming before: which is that for some reason I did not look into, whenever there was a client
+side termination / disconnection, the server would crash too! Which is completely opposite behavior to 
+what is expected of a server - it should be completely detached from client influence!
+"""

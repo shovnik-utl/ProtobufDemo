@@ -1,2 +1,7 @@
-protobuf==7.34.1
+grpcio==1.80.0
+grpcio-tools==1.80.0
+nanopb==0.4.9.1
+protobuf==6.33.6
+setuptools==82.0.1
+typing_extensions==4.15.0
 uvloop==0.22.1

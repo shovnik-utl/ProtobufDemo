@@ -13,7 +13,9 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
-#include "sensor.pb-c.h"
+#include <pb_encode.h>
+#include <pb_decode.h>
+#include "sensor.pb.h"
 
 #define HOST "127.0.0.1"
 #define PORT 5555

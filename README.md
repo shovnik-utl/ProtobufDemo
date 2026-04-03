@@ -121,3 +121,51 @@ make
 venv/bin/python protobuf_server.py   # terminal 1
 ./protobuf_client                    # terminal 2
 ```
+
+## `nanopb`
+
+`nanopb` is an implementation of Google's Protocall Buffers or Protobufs
+for embedded systems, designed to have:
+1.  *low memory footprint*: both code/ROM and stack/RAM spaces.
+2.  *no heap allocation*: using heap is considered problematic in MCUs.
+
+### Why is it "bad"?
+1. *Slow access*: due to overhead of the heap algorithm implementation (=allocators, etc).
+2. *Memory fragmentation*: due to overuse of the heap resulting in lack of memory to allocate even when 
+  cummulatively there might a lot of memory still available! Want to avoid this inefficeint s
+3. *Memory Leaks*: with the stack, memory management is abstracted by the compiler (automatic variables); with the heap, its not. *Manual memory management* is the root of human errors resulting in memory leaks. Really bad if your already limited memory is leaking.
+
+### Git submodule
+You could just copy some files as and when needed, but it is a
+good idea to maintain a git reference to the `nanopb` project so that
+it becomes a *versioned dependency* which you can use to *reproduce*
+your builds across computers with the *correct version everytime*.
+
+### `nanopb` vs `protoc`: Compatibility?
+
+Note: there is compatibilit involved because `nanopb` has been built to use a specific version of
+the Protobuf protocol and thus must be *compatible* with `protoc` (the protobuf compiler).
+
+1. `nanopb` is tied to protobuf 3.x API model; so use `syntax = "proto3";`
+2. Stay within safe version range to avoid incompatibility issues: protoc 3.x <-> nanopb 0.4.x
+
+### Step 1: Integrate Nanopb into Build System
+
+To integrate nanopb means to *replace* the standard C "backend": `protoc-gen-c`,
+and "plug in" another backend for embedded C (Nanopb): `protoc-gen-nanopb`, ie:
+
+  protoc --plugin=protoc-gen-c=/path/to/protoc-gen-c            --c_out=.       my_schema.proto
+
+to
+
+  protoc --plugin=protoc-gen-nanopb=./path/to/protoc-gen-nanopb --nanopb_out=.  my_schema.proto
+
+Normally you would need to debug till the Makefile successfully builds :/
+(look at details in this commmit for reference.)
+But I have put all the rules in the Makefile so that it gets started through a simple `make`.
+
+## Step 2: Integrate into source code (new API!)
+
+Switching backends also has the consequence that the generated code (probably) uses a different API!
+So now you will need to look at `nanopb`'s documentation to figure out what this new API is
+and how it works (what's the framework like compared to the standard Google protobuf implementation?)
